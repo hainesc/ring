@@ -145,6 +145,20 @@ impl EphemeralPrivateKey {
     pub fn bytes(&self) -> &[u8] {
         self.private_key.bytes_less_safe()
     }
+
+    pub fn clone(&self) -> Result<Self, error::Unspecified> {
+        let b = self.private_key.bytes_less_safe();
+        let c = ec::Seed::from_bytes(
+            self.algorithm.curve,
+            untrusted::Input::from(b),
+            cpu::features(),
+        )?;
+
+        Ok(Self {
+            private_key: c,
+            algorithm: self.algorithm,
+        })
+    }
 }
 
 /// A public key for key agreement.
